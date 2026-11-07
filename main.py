@@ -7,9 +7,17 @@ def f_load():
     global persons
     try:
         with open('persons.json', 'r', encoding='utf-8') as jsonFile:
-            persons = json.load(jsonFile)
+            data = json.load(jsonFile)
     except FileNotFoundError:
         persons = []
+        return persons
+    except (json.JSONDecodeError, UnicodeDecodeError, OSError) as e:
+        print(f"persons.json을 읽을 수 없습니다 ({e}). 원본을 보호하기 위해 변경 없이 종료합니다.")
+        raise SystemExit(1)
+    if not isinstance(data, list) or any(not isinstance(p, dict) for p in data):
+        print("persons.json이 회원 목록(딕셔너리 리스트) 형식이 아닙니다. 원본을 보호하기 위해 변경 없이 종료합니다.")
+        raise SystemExit(1)
+    persons = data
     return persons
 
 
