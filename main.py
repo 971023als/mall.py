@@ -164,10 +164,13 @@ def f_check():
     found = False
     for person in persons:
         if person['name'] == name:
+            person['access_count'] = person.get('access_count', 0) + 1
             _update_grade(person)
             print(f"{person['name']}님의 회원등급은 {person['grade']} 입니다.")
             found = True
-    if not found:
+    if found:
+        f_save()
+    else:
         print("해당 이름의 회원이 없습니다.")
 
 
