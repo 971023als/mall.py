@@ -36,6 +36,26 @@ def _update_grade(person):
         person['grade'] = 'STANDARD'
 
 
+def _select_match(matches):
+    """이름·전화번호가 모두 같은 후보가 2명 이상일 때 대상을 명시 선택받는다. 취소 시 None."""
+    print("이름과 전화번호가 같은 회원이 여러 명입니다. 대상을 직접 선택하세요.")
+    for num, i in enumerate(matches, 1):
+        p = persons[i]
+        print(f"{num}. {p['name']} / {p['phone']} / {p['age']}세 / {p['hobby']}")
+    while True:
+        raw = input("번호를 입력하세요 (0: 취소): ")
+        try:
+            num = int(raw)
+        except ValueError:
+            print("숫자를 입력하세요.")
+            continue
+        if num == 0:
+            return None
+        if 1 <= num <= len(matches):
+            return matches[num - 1]
+        print("목록에 있는 번호를 입력하세요.")
+
+
 def f_menu():
     print("--------------------------------------------")
     print("1. 회원 리스트  read")
@@ -114,7 +134,13 @@ def f_modify():
             print("일치하는 회원이 없습니다.")
             return
 
-    index = matches[0]
+    if len(matches) > 1:
+        index = _select_match(matches)
+        if index is None:
+            print("작업을 취소했습니다.")
+            return
+    else:
+        index = matches[0]
     new_phone = input("새로운 전화번호를 입력하시오: ")
     while True:
         try:
@@ -143,12 +169,20 @@ def f_delete():
     if len(matches) > 1:
         print(f"동명이인이 {len(matches)}명 있습니다. 전화번호로 본인 확인합니다.")
         del_tel = input("전화번호를 입력하시오: ")
-        matches = [i for i, p in enumerate(persons) if p['name'] == del_name and p['phone'] == del_tel]
+        matches = [i for i in matches if persons[i]['phone'] == del_tel]
         if len(matches) == 0:
             print("일치하는 회원이 없습니다.")
             return
 
-    persons.pop(matches[0])
+    if len(matches) > 1:
+        index = _select_match(matches)
+        if index is None:
+            print("작업을 취소했습니다.")
+            return
+    else:
+        index = matches[0]
+
+    persons.pop(index)
     f_save()
     print(f"'{del_name}' 회원이 삭제되었습니다.")
 
